@@ -504,6 +504,47 @@ EOF
         check_backup_config "/usr/local/bin/ha-chromium-kiosk.sh" "kiosk startup script"
     fi
 
+    # Create the resolution set script
+    echo "Creating the display resolution script..."
+    cat <<EOF >/usr/local/bin/ha-resolution-set.sh
+#!/bin/bash
+
+#If no argument is specified, ask for it and exit
+if [[ -z "$@" ]];
+then
+    echo "An argument is needed to run this script";
+    exit
+else
+    arg="$@"
+    
+    #Basic check to make sure argument number is valid. If not, display error and exit
+    if [[ $(($(echo $arg | grep -o "\s" | wc --chars) / 2 )) -ne 2 ]];
+    then
+        echo "Invalid Parameters. You need to specify parameters in the format "width height refreshRate""
+        echo "For example setResolution "2560 1440 60""
+        exit
+    fi
+
+    #Save stuff in variables and then use xrandr with those variables
+    modename=$(echo $arg | sed 's/\s/_/g')
+    display=$(xrandr | grep -Po '.+(?=\sconnected)')
+    
+    if [[ "$(xrandr|grep $modename)" = "" ]];
+    then
+        xrandr --newmode $modename $(gtf $(echo $arg) | grep -oP '(?<="\s\s).+') &&
+        xrandr --addmode $display $modename
+    fi
+    
+    xrandr --output $display --mode $modename
+    
+    #If no error occurred, display success message
+    if [[ $? -eq 0 ]];
+    then
+        echo "Display changed successfully to $arg"
+    fi
+fi
+EOF
+
     # Create the kiosk startup script
     echo "Creating the kiosk startup script..."
     cat <<EOF >/usr/local/bin/ha-chromium-kiosk.sh
@@ -580,9 +621,13 @@ chromium \
 EOF
 
     chmod +x /usr/local/bin/ha-chromium-kiosk.sh
+    chmod +x /usr/local/bin/ha-resolution-set.sh
 
     echo "Configuring Openbox to start the kiosk script..."
     echo "/usr/local/bin/ha-chromium-kiosk.sh &" > $OPENBOX_CONFIG_DIR/autostart
+
+    echo "Configuring Openbox to set the resolution..."
+    echo "/urs/local/bin/ha-resolution-set.sh 720 720 60 &" > $OPENBOX_CONFIG_DIR/autostart
 
     # Check for existing systemd service
     if [ -f "/etc/systemd/system/ha-chromium-kiosk.service" ]; then
