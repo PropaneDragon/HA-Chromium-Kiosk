@@ -488,7 +488,7 @@ Type=idle
 EOF
 
     systemctl daemon-reload
-    systemctl restart getty@tty1.service
+    # systemctl restart getty@tty1.service
 
     # Configure Openbox
     echo "Configuring Openbox for the kiosk user..."
