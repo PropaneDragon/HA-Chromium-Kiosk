@@ -631,7 +631,7 @@ EOF
     echo "/usr/local/bin/ha-chromium-kiosk.sh &" > $OPENBOX_CONFIG_DIR/autostart
 
     echo "Configuring Openbox to set the resolution..."
-    echo "/urs/local/bin/ha-resolution-set.sh 720 720 60 &" > $OPENBOX_CONFIG_DIR/autostart
+    echo "/usr/local/bin/ha-resolution-set.sh 720 720 60 &" >> $OPENBOX_CONFIG_DIR/autostart
 
     # Check for existing systemd service
     if [ -f "/etc/systemd/system/ha-chromium-kiosk.service" ]; then
