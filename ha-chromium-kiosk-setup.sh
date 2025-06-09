@@ -460,6 +460,7 @@ install_kiosk() {
     prompt_user HA_IP "Enter the IP address of your Home Assistant instance" ""
     prompt_user HA_PORT "Enter the port for Home Assistant" "8123"
     prompt_user HA_DASHBOARD_PATH "Enter the path to your Home Assistant dashboard" "lovelace/default_view"
+    prompt_user is_ssl "Is your Home Assistant instance https? (Y/n)" "Y"
 
     # Kiosk mode and cursor settings
     prompt_user enable_kiosk "Do you want to enable kiosk mode? (Y/n)" "Y"
@@ -468,7 +469,10 @@ install_kiosk() {
     KIOSK_MODE=""
     [[ $enable_kiosk =~ ^[Yy]?$ ]] && KIOSK_MODE="?kiosk=true"
 
-    KIOSK_URL="http://$HA_IP:$HA_PORT/$HA_DASHBOARD_PATH$KIOSK_MODE"
+    KIOSK_HTTP="http"
+    [[ $is_ssl =~ ^[Yy]?$ ]] && KIOSK_HTTP="https"
+
+    KIOSK_URL="$KIOSK_HTTP://$HA_IP:$HA_PORT/$HA_DASHBOARD_PATH$KIOSK_MODE"
     echo "Your Home Assistant dashboard will be displayed at: $KIOSK_URL"
     echo "Setting up Chromium Kiosk Mode for Home Assistant URL:$KIOSK_URL"
 
